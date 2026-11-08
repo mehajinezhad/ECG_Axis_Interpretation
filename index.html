@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>درس فوریت‌های داخلی ۱: تعیین محور قلب</title>
+<style>
+/* ---------- فونت IRANYekanX (Variable) از مخزن GitHub ---------- */
+@font-face{
+  font-family:'IRANYekanX';
+  src:url('https://raw.githubusercontent.com/mehajinezhad/ECG_Axis_Interpretation/main/IRANYekanXVFaNumVF.ttf') format('truetype');
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:'IRANYekanX','Vazirmatn','Segoe UI',Tahoma,'Iranian Sans',sans-serif;
+  font-weight:400;
+  background:#eef4f8;
+  background-image:radial-gradient(circle at 50% -10%,#dff0f4,transparent 60%);
+  color:#12263a;
+  line-height:1.85;
+  font-size:15px;
+}
+.wrap{max-width:860px;margin:0 auto;padding:18px 14px 40px}
+
+/* ---------- سربرگ بالای صفحه ---------- */
+.masthead{
+  background:linear-gradient(135deg,#0b3c5d,#0f766e);
+  color:#fff;
+  border-radius:14px;
+  padding:13px 16px;
+  font-size:15px;
+  font-weight:700;
+  line-height:1.9;
+  text-align:center;
+  box-shadow:0 8px 22px rgba(11,60,93,.18);
+  margin-bottom:16px;
+}
+
+.top{text-align:center;margin-bottom:18px}
+.badge{display:inline-block;background:#0f766e;color:#fff;font-size:12px;padding:3px 12px;border-radius:999px;letter-spacing:.3px;font-weight:600}
+h1{font-size:22px;margin:10px 0 4px;color:#0b3c5d;font-weight:800}
+.sub{font-size:13px;color:#5b7288;margin:0 0 14px}
+.progress{height:9px;background:#d9e6f0;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
+.progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c1a8,#0f766e);transition:width .35s ease}
+.dots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
+.dot{
+  width:32px;height:32px;border-radius:50%;border:1.5px solid #c7dbe9;background:#fff;
+  color:#4a6b85;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:.15s
+}
+.dot.wide{width:auto;padding:0 14px;border-radius:999px}
+.dot:hover{border-color:#0ea5a4}
+.dot.done{background:#e6f7f1;border-color:#5ec7a8;color:#0f766e}
+.dot.active{background:#0f766e;border-color:#0f766e;color:#fff;box-shadow:0 4px 12px rgba(15,118,110,.3)}
+
+.card{background:#fff;border:1px solid #dbe6f0;border-radius:18px;padding:18px 16px;box-shadow:0 8px 26px rgba(15,60,90,.07);margin-bottom:16px}
+.screen{display:none}
+.screen.active{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h2{font-size:18px;margin:0 0 10px;color:#0b3c5d;border-right:4px solid #0ea5a4;padding-right:10px;font-weight:800}
+h3{font-size:15px;margin:18px 0 8px;color:#0f766e;font-weight:700}
+.body p{margin:0 0 10px}
+.body ul{margin:0 0 10px;padding-right:20px}
+.body li{margin-bottom:6px}
+.note{background:#f0f9ff;border-right:3px solid #38bdf8;padding:8px 12px;border-radius:8px;font-size:13.5px;color:#075985}
+
+.fig{margin:12px 0}
+.ecg-wrap{border:1px solid #e8dcc6;border-radius:12px;overflow:hidden;background:#fffdf7}
+.ecg{display:block;width:100%;height:auto}
+figcaption{font-size:12.5px;color:#5b7288;margin-top:6px;padding-right:4px}
+.lead.lit .trace{stroke:#b45309;stroke-width:2.7}
+
+.quiz{margin-top:16px;border-top:1px dashed #dbe6f0;padding-top:14px}
+.qtext{font-weight:700;margin:0 0 10px;font-size:14.5px}
+.opt{
+  display:block;width:100%;text-align:right;padding:11px 14px;margin:8px 0;border-radius:12px;
+  border:1.5px solid #cfe0ee;background:#fbfdff;font-family:inherit;font-size:14px;font-weight:400;
+  color:#12263a;cursor:pointer;transition:.15s;line-height:1.7
+}
+.opt:hover:not(:disabled){border-color:#0ea5a4;background:#effcfb}
+.opt:disabled{cursor:default;opacity:1}
+.opt.correct{border-color:#12805c;background:#e8f7f0;font-weight:700}
+.opt.wrong{border-color:#c0392b;background:#fdeceb}
+.fb{margin-top:12px;padding:10px 14px;border-radius:12px;font-size:13.8px;line-height:1.8}
+.fb.ok{background:#e8f7f0;border:1px solid #b7e4cf;color:#0b5a41}
+.fb.no{background:#fdeceb;border:1px solid #f5c2bd;color:#8c2318}
+.reason{margin-top:10px;padding:10px 14px;border-radius:12px;background:#f4f8fb;border:1px dashed #cfe0ee;font-size:13.5px;color:#334e68}
+
+.navbtns{display:flex;gap:10px;justify-content:space-between;margin-top:18px}
+.btn{
+  font-family:inherit;font-size:14px;padding:11px 20px;border-radius:12px;border:1.5px solid transparent;
+  cursor:pointer;transition:.15s;font-weight:700
+}
+.btn.primary{background:#0f766e;color:#fff;box-shadow:0 6px 16px rgba(15,118,110,.25)}
+.btn.primary:hover:not(:disabled){background:#0b5f59}
+.btn.primary:disabled{background:#c7dbe9;color:#7d95a8;box-shadow:none;cursor:not-allowed}
+.btn.ghost{background:#fff;border-color:#cfe0ee;color:#33566f}
+.btn.ghost:hover:not(:disabled){border-color:#0ea5a4;color:#0f766e}
+.btn.ghost:disabled{opacity:.45;cursor:not-allowed}
+
+.fcard{border:1px solid #e3edf5;border-radius:14px;padding:14px;margin:14px 0;background:#fbfdff}
+.fcard h3{margin-top:0}
+.summary{margin-top:16px;padding:14px;border-radius:14px;background:#e8f7f0;border:1px solid #b7e4cf;color:#0b5a41;font-size:14.5px}
+
+/* ---------- پانوشت صفحه ---------- */
+.foot{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.credit{
+  margin:0;
+  font-size:13.5px;
+  font-weight:400;
+  color:#33566f;
+  background:#fff;
+  border:1px solid #dbe6f0;
+  border-radius:14px;
+  padding:10px 18px;
+  line-height:1.9;
+  box-shadow:0 4px 14px rgba(15,60,90,.06);
+}
+.credit strong{font-weight:800;color:#0b3c5d}
+.foot-actions{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
+.hint{font-size:12px;color:#7d95a8}
+
+@media(max-width:480px){
+  h1{font-size:18px}
+  h2{font-size:16px}
+  .masthead{font-size:13px;padding:11px 12px;line-height:1.85}
+  .card{padding:14px 12px;border-radius:14px}
+  .opt{font-size:13px;padding:10px 12px}
+  .btn{font-size:13px;padding:10px 14px}
+  .credit{font-size:12.5px;padding:9px 12px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">درس فوریت های داخلی 1: موضوع تعیین محور قلب </div>
+
+  <header class="top">
+    <div class="badge">فوریت‌های داخلی ۱</div>
+    <h1>محور قلب — تفسیر گام‌به‌گام</h1>
+    <p class="sub">دانشجویان ترم ۲ فوریت‌های پزشکی · شش گام کوتاه + آزمون پنج نوار</p>
+    <div class="progress"><i id="pbar"></i></div>
+    <div class="dots" id="dots"></div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="foot">
+    <p class="credit">مدرس: <strong>دکتر محمد اسماعیل حاجی نژاد</strong>، دانشگاه علوم پزشکی بوشهر، گروه هوشبری</p>
+    <div class="foot-actions">
+      <button class="btn ghost" id="resetBtn" type="button">شروع مجدد</button>
+      <span class="hint">پیشرفت شما فقط در همین مرورگر ذخیره می‌شود.</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   ۱) موتور رسم نوار قلب شماتیک روی کاغذ شطرنجی
+   ============================================================ */
+var __uid = 0;
+
+function beatPath(x, y, ld){
+  var q = ld.morph || 'pos';
+  var pA = (ld.p === 'neg') ? -9 : 9;
+  var tA = (ld.t === 'neg') ? -13 : 13;
+  var d = 'M ' + x + ' ' + y;
+  d += ' L ' + (x+8) + ' ' + y;
+  d += ' Q ' + (x+14) + ' ' + (y - pA) + ' ' + (x+20) + ' ' + y;
+  d += ' L ' + (x+30) + ' ' + y;
+  if (q === 'pos'){
+    d += ' L ' + (x+31) + ' ' + (y+5) + ' L ' + (x+34) + ' ' + (y-34) + ' L ' + (x+37) + ' ' + (y+7) + ' L ' + (x+41) + ' ' + y;
+  } else if (q === 'neg'){
+    d += ' L ' + (x+31) + ' ' + (y-6) + ' L ' + (x+34) + ' ' + (y+32) + ' L ' + (x+37) + ' ' + (y-4) + ' L ' + (x+41) + ' ' + y;
+  } else {
+    d += ' L ' + (x+31) + ' ' + (y+4) + ' L ' + (x+34) + ' ' + (y-17) + ' L ' + (x+37) + ' ' + (y+17) + ' L ' + (x+41) + ' ' + y;
+  }
+  d += ' L ' + (x+52) + ' ' + y;
+  d += ' Q ' + (x+63) + ' ' + (y - tA) + ' ' + (x+74) + ' ' + y;
+  d += ' L ' + (x+84) + ' ' + y;
+  return d;
+}
+
+function buildStrip(leads){
+  var uid = 'u' + (++__uid);
+  var rowH = 90, labelW = 44, plotW = 504, padTop = 6;
+  var W = labelW + plotW + 8;
+  var H = padTop * 2 + leads.length * rowH;
+
+  var s = '<svg class="ecg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="نوار قلب شماتیک">';
+  s += '<defs>';
+  s += '<pattern id="sm-' + uid + '" width="6" height="6" patternUnits="userSpaceOnUse">';
+  s += '<path d="M 6 0 L 0 0 0 6" fill="none" stroke="#f2c9c9" stroke-width="0.7"/>';
+  s += '</pattern>';
+  s += '<pattern id="bg-' + uid + '" width="30" height="30" patternUnits="userSpaceOnUse">';
+  s += '<rect width="30" height="30" fill="url(#sm-' + uid + ')"/>';
+  s += '<path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e6a3a3" stroke-width="1"/>';
+  s += '</pattern>';
+  s += '</defs>';
+  s += '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#fffdf7"/>';
+  s += '<rect x="' + labelW + '" y="' + padTop + '" width="' + plotW + '" height="' + (leads.length*rowH) + '" fill="url(#bg-' + uid + ')" stroke="#e6a3a3" stroke-width="1"/>';
+
+  for (var i = 0; i < leads.length; i++){
+    var ld = leads[i];
+    var top = padTop + i * rowH;
+    var baseY = top + 48;
+    var d = '';
+    var x = labelW;
+    while (x + 84 <= labelW + plotW){
+      d += beatPath(x, baseY, ld);
+      x += 84;
+    }
+    s += '<g class="lead" data-lead="' + ld.name + '">';
+    s += '<rect class="hl" x="' + labelW + '" y="' + top + '" width="' + plotW + '" height="' + rowH + '" fill="#facc15" opacity="0"/>';
+    s += '<text class="lbl" x="' + (labelW/2) + '" y="' + (baseY+7) + '" text-anchor="middle" font-size="15" font-weight="700" fill="#0f3d5c">' + ld.name + '</text>';
+    s += '<path class="trace" d="' + d + '" fill="none" stroke="#0b2e4f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    s += '</g>';
+  }
+
+  s += '</svg>';
+  return s;
+}
+
+function highlight(svg, names){
+  if (!svg) return;
+  var rows = svg.querySelectorAll('.lead');
+  for (var i = 0; i < rows.length; i++){
+    var g = rows[i];
+    if (names.indexOf(g.getAttribute('data-lead')) !== -1){
+      var r = g.querySelector('.hl');
+      if (r) r.setAttribute('opacity', '0.5');
+      g.classList.add('lit');
+    }
+  }
+}
+
+/* ============================================================
+   ۲) محتوای درس — شش گام
+   ============================================================ */
+var STEPS = [
+  {
+    title: 'گام ۱ — محور قلب چیست و محدوده طبیعی آن',
+    body: '<p><b>محور قلب</b> میانگین برداری همه دپلاریزاسیون‌های بطن‌ها در <b>صفحه فرونتال</b> است؛ یعنی جهت خالص جریان الکتریکی قلب که در لیدهای اندامی دیده می‌شود.</p>'
+        + '<p>چون توده عضلانی بطن چپ بزرگ‌تر است، بردار خالص معمولاً به سمت <b>پایین و چپ</b> می‌افتد. به همین دلیل محور طبیعی بین <b>۳۰- تا ۹۰+ درجه</b> است.</p>'
+        + '<p class="note">در تفسیر بالینی، معمولاً <b>محور QRS</b> را می‌سنجیم، نه محور موج P یا T.</p>',
+    strips: [
+      {
+        leads: [{name:'I', morph:'pos'}, {name:'II', morph:'pos'}, {name:'aVF', morph:'pos'}],
+        caption: 'نوار شماتیک ۱: در هر سه لید I، II و aVF کمپلکس QRS مثبت است.'
+      }
+    ],
+    q: {
+      text: 'محور نرمال قلب در صفحه فرونتال معمولاً کدام محدوده است؟',
+      options: ['۰ تا ۹۰+ درجه', '۳۰- تا ۹۰+ درجه', '۹۰- تا ۳۰- درجه', '۹۰+ تا ۱۸۰+ درجه'],
+      correct: 1,
+      why: 'محدوده استاندارد نرمال، ۳۰- تا ۹۰+ درجه است. گزینه «۰ تا ۹۰+» فقط بخشی از محدوده نرمال را نشان می‌دهد و دو گزینه دیگر انحراف محور هستند.',
+      hl: [{strip:0, leads:['I','II','aVF']}]
+    }
+  },
+  {
+    title: 'گام ۲ — روش ربع‌ها: لید I و aVF',
+    body: '<p>ساده‌ترین روش، <b>روش ربع‌ها</b> است. دو لید را نگاه می‌کنیم:</p>'
+        + '<ul>'
+        + '<li><b>لید I</b> افقی است: مثبت بودن آن یعنی بردار به سمت <b>چپ</b>، منفی بودن یعنی به سمت <b>راست</b>.</li>'
+        + '<li><b>لید aVF</b> عمودی است: مثبت بودن یعنی بردار به سمت <b>پایین</b>، منفی بودن یعنی به سمت <b>بالا</b>.</li>'
+        + '</ul>'
+        + '<p>ترکیب این دو، چهار ربع می‌سازد:</p>'
+        + '<ul>'
+        + '<li>I مثبت + aVF مثبت → ربع <b>چپ-پایین</b> → نرمال</li>'
+        + '<li>I مثبت + aVF منفی → ربع <b>چپ-بالا</b> → نیاز به بررسی بیشتر</li>'
+        + '<li>I منفی + aVF مثبت → ربع <b>راست-پایین</b> → RAD</li>'
+        + '<li>I منفی + aVF منفی → ربع <b>راست-بالا</b> → محور افراطی</li>'
+        + '</ul>'
+        + '<p class="note">در نوار زیر QRS در لید I مثبت و در aVF منفی است؛ یعنی در ربع چپ-بالا هستیم.</p>',
+    strips: [
+      {
+        leads: [{name:'I', morph:'pos'}, {name:'aVF', morph:'neg'}],
+        caption: 'نوار شماتیک ۲: I مثبت، aVF منفی.'
+      }
+    ],
+    q: {
+      text: 'در روش ربع‌ها، اگر QRS در لید I مثبت و در aVF منفی باشد، ابتدا کدام ربع مطرح می‌شود؟',
+      options: ['ربع چپ-پایین (نرمال)', 'ربع چپ-بالا (نیاز به بررسی بیشتر)', 'ربع راست-پایین (RAD)', 'ربع راست-بالا (افراطی)'],
+      correct: 1,
+      why: 'لید I مثبت یعنی بردار به چپ و aVF منفی یعنی بردار به بالا؛ پس در ربع چپ-بالا هستیم. این حالت به‌تنهایی نه نرمال است نه پاتولوژیک و باید با لید II تصمیم گرفت.',
+      hl: [{strip:0, leads:['I','aVF']}]
+    }
+  },
+  {
+    title: 'گام ۳ — لید II: جدا کردن LAD پاتولوژیک از محور نرمال',
+    body: '<p>وقتی به ربع <b>چپ-بالا</b> رسیدیم (I مثبت و aVF منفی)، هنوز نمی‌توانیم بگوییم بیمار مشکل دارد یا نه. اینجا <b>لید II</b> تصمیم‌گیرنده است:</p>'
+        + '<ul>'
+        + '<li>اگر <b>لید II مثبت</b> باشد → محور بین ۰ و ۳۰- می‌ماند → <b>نرمال / فیزیولوژیک</b>.</li>'
+        + '<li>اگر <b>لید II منفی</b> باشد → محور کمتر از ۳۰- است → <b>LAD پاتولوژیک</b>.</li>'
+        + '</ul>'
+        + '<p class="note">نمونه بالایی: II مثبت (نرمال). نمونه پایینی: II منفی (LAD).</p>',
+    strips: [
+      {
+        leads: [{name:'I', morph:'pos'}, {name:'aVF', morph:'neg'}, {name:'II', morph:'pos'}],
+        caption: 'نمونه الف: I مثبت، aVF منفی، II مثبت → محور مرزی/فیزیولوژیک.'
+      },
+      {
+        leads: [{name:'I', morph:'pos'}, {name:'aVF', morph:'neg'}, {name:'II', morph:'neg'}],
+        caption: 'نمونه ب: I مثبت، aVF منفی، II منفی → LAD پاتولوژیک.'
+      }
+    ],
+    q: {
+      text: 'کدام یافته، LAD پاتولوژیک را از محور نرمال/فیزیولوژیک جدا می‌کند؟',
+      options: [
+        'QRS مثبت در لید I',
+        'QRS منفی در لید II، همراه با I مثبت و aVF منفی',
+        'QRS مثبت در aVF',
+        'QRS ایزوالکتریک در لید III'
+      ],
+      correct: 1,
+      why: 'اگر I مثبت و aVF منفی باشد، منفی بودن لید II محور را به کمتر از ۳۰- می‌برد و LAD پاتولوژیک تلقی می‌شود. اگر لید II مثبت بماند، محور مرزی و بی‌خطر است.',
+      hl: [{strip:1, leads:['II','aVF','I']}]
+    }
+  },
+  {
+    title: 'گام ۴ — انحراف محور به راست (RAD)',
+    body: '<p>الگوی RAD: <b>لید I منفی</b> و <b>لید aVF مثبت</b>؛ یعنی بردار به سمت راست و پایین رفته است.</p>'
+        + '<p>در فوریت‌ها، RAD می‌تواند سرنخ <b>آمبولی ریه</b>، هیپرتروفی بطن راست، COPD، بلوک شاخه‌ای خلفی چپ یا دکستراکاردیا باشد.</p>'
+        + '<p class="note">محور به‌تنهایی تشخیص نیست؛ باید کنار علائم بالینی خوانده شود. نیاز به بازبینی استاد از نظر تطابق با نوارهای آموزشی.</p>',
+    strips: [
+      {
+        leads: [{name:'I', morph:'neg'}, {name:'aVF', morph:'pos'}, {name:'III', morph:'pos'}],
+        caption: 'نوار شماتیک ۳: I منفی، aVF مثبت.'
+      }
+    ],
+    q: {
+      text: 'کدام وضعیت بالینی با انحراف محور به راست (RAD) همراهی شایع دارد؟',
+      options: ['بلوک شاخه‌ای قدامی چپ', 'آمبولی ریه', 'هیپرتروفی بطن چپ', 'انفارکتوس تحتانی'],
+      correct: 1,
+      why: 'آمبولی ریه می‌تواند بار بطن راست را بالا ببرد و محور را به راست بچرخاند. بلوک شاخه‌ای قدامی چپ و هیپرتروفی بطن چپ بیشتر با LAD و انفارکتوس تحتانی با الگوهای دیگر همراه‌اند.',
+      hl: [{strip:0, leads:['I','aVF']}]
+    }
+  },
+  {
+    title: 'گام ۵ — محور شمال‌غربی (انحراف شدید)',
+    body: '<p>وقتی <b>هر دو لید I و aVF منفی</b> باشند، محور در ربع <b>راست-بالا</b> قرار می‌گیرد؛ به این حالت <b>محور افراطی</b> یا شمال‌غربی می‌گویند (بین ۹۰- و ۱۸۰-).</p>'
+        + '<p>علل مهم در فوریت‌ها: <b>ریتم بطنی</b> (مثل تاکی‌کاردی بطنی)، <b>جابجایی الکترودهای اندامی</b>، هایپرکالمی و خطای ثبت.</p>'
+        + '<p class="note">این حالت را هرگز با RAD اشتباه نگیرید و آن را «غیرقابل تفسیر» رها نکنید.</p>',
+    strips: [
+      {
+        leads: [{name:'I', morph:'neg'}, {name:'aVF', morph:'neg'}],
+        caption: 'نوار شماتیک ۴: هر دو لید I و aVF منفی.'
+      }
+    ],
+    q: {
+      text: 'محور شمال‌غربی (انحراف شدید) با کدام الگو در لیدهای I و aVF مشخص می‌شود؟',
+      options: ['هر دو لید مثبت', 'لید I مثبت و aVF منفی', 'لید I منفی و aVF مثبت', 'هر دو لید منفی'],
+      correct: 3,
+      why: 'منفی بودن هم‌زمان I و aVF محور را در ربع راست-بالا قرار می‌دهد که «محور افراطی» نامیده می‌شود.',
+      hl: [{strip:0, leads:['I','aVF']}]
+    }
+  },
+  {
+    title: 'گام ۶ — سه اشتباه رایج در تفسیر محور',
+    body: '<p><b>۱) حفظ الگو بدون بررسی نظام‌مند:</b> دانشجو فقط «I مثبت و aVF منفی» را حفظ می‌کند و بدون بررسی لید II، محور فیزیولوژیک و LAD پاتولوژیک را یکسان می‌بیند. راه‌حل: همیشه لید II را بررسی کنید.</p>'
+        + '<p><b>۲) نادیده گرفتن جابجایی الکترودهای اندامی:</b> تعویض الکترود دست راست و چپ می‌تواند RAD یا LAD کاذب بسازد. راه‌حل: قبل از تفسیر محور، <b>P در لید I و aVR</b> را نگاه کنید؛ P منفی در I و P مثبت در aVR هشدار جابجایی است.</p>'
+        + '<p><b>۳) اشتباه گرفتن محور افراطی با RAD:</b> هر دو لید I و aVF منفی یعنی محور افراطی، نه RAD. راه‌حل: الگو را دقیق ثبت کنید و علل آن (ریتم بطنی، جابجایی لید، هایپرکالمی) را در نظر بگیرید.</p>'
+        + '<p class="note">در نوار زیر، موج P در لید I منفی و در aVR مثبت است؛ این الگوی هشدار جابجایی الکترودهاست.</p>',
+    strips: [
+      {
+        leads: [
+          {name:'I', morph:'neg', p:'neg', t:'neg'},
+          {name:'aVR', morph:'pos', p:'pos'},
+          {name:'aVF', morph:'pos'}
+        ],
+        caption: 'نوار شماتیک ۵: P منفی در I و P مثبت در aVR → احتمال جابجایی الکترودهای دست راست و چپ.'
+      }
+    ],
+    q: {
+      text: 'کدام مورد از اشتباهات رایج در تفسیر محور است؟',
+      options: [
+        'استفاده از لید II برای تأیید LAD',
+        'نادیده گرفتن احتمال جابجایی الکترودهای اندامی',
+        'بررسی QRS در لید I و aVF',
+        'تشخیص RAD وقتی I منفی و aVF مثبت است'
+      ],
+      correct: 1,
+      why: 'جابجایی الکترودهای اندامی می‌تواند محور را به‌طور کاذب منحرف نشان دهد. سه گزینه دیگر در واقع بخشی از رویکرد صحیح هستند، نه اشتباه.',
+      hl: [{strip:0, leads:['I','aVR']}]
+    }
+  }
+];
+
+/* ============================================================
+   ۳) آزمون پایانی — پنج نوار
+   ============================================================ */
+var OPT_AXIS = [
+  'نرمال (شامل محور مرزی/فیزیولوژیک)',
+  'انحراف به چپ (LAD)',
+  'انحراف به راست (RAD)',
+  'محور شمال‌غربی (انحراف شدید)'
+];
+
+var FINAL = [
+  {
+    leads: [{name:'I', morph:'pos'}, {name:'aVF', morph:'pos'}, {name:'II', morph:'pos'}],
+    correct: 0,
+    why: 'لید I مثبت و aVF مثبت → ربع چپ-پایین → محور نرمال. لید II هم مثبت است و همین را تأیید می‌کند.',
+    reason: '<b>۱.</b> لید I مثبت → جهت به چپ. <b>۲.</b> لید aVF مثبت → جهت به پایین. <b>۳.</b> ربع چپ-پایین → محدوده نرمال. <b>۴.</b> لید II مثبت → تأیید محور نرمال.'
+  },
+  {
+    leads: [{name:'I', morph:'pos'}, {name:'aVF', morph:'neg'}, {name:'II', morph:'neg'}],
+    correct: 1,
+    why: 'I مثبت و aVF منفی → ربع چپ-بالا. چون لید II منفی است، محور کمتر از ۳۰- است → LAD پاتولوژیک.',
+    reason: '<b>۱.</b> لید I مثبت → جهت به چپ. <b>۲.</b> لید aVF منفی → جهت به بالا. <b>۳.</b> ربع چپ-بالا؛ باید لید II بررسی شود. <b>۴.</b> لید II منفی است → محور کمتر از ۳۰- → LAD پاتولوژیک.'
+  },
+  {
+    leads: [{name:'I', morph:'neg'}, {name:'aVF', morph:'pos'}, {name:'II', morph:'pos'}],
+    correct: 2,
+    why: 'لید I منفی و aVF مثبت → ربع راست-پایین → RAD.',
+    reason: '<b>۱.</b> لید I منفی → جهت به راست. <b>۲.</b> لید aVF مثبت → جهت به پایین. <b>۳.</b> ربع راست-پایین → محور بیشتر از ۹۰+ → RAD.'
+  },
+  {
+    leads: [{name:'I', morph:'neg'}, {name:'aVF', morph:'neg'}, {name:'II', morph:'neg'}],
+    correct: 3,
+    why: 'هر دو لید I و aVF منفی → ربع راست-بالا → محور انحراف شدید(شمال‌غربی).',
+    reason: '<b>۱.</b> لید I منفی → جهت به راست. <b>۲.</b> لید aVF منفی → جهت به بالا. <b>۳.</b> ربع راست-بالا → محور افراطی. <b>۴.</b> باید ریتم بطنی و جابجایی لیدها را بررسی کرد.'
+  },
+  {
+    leads: [{name:'I', morph:'pos'}, {name:'aVF', morph:'neg'}, {name:'II', morph:'pos'}],
+    correct: 0,
+    why: 'I مثبت و aVF منفی → ربع چپ-بالا. اما لید II مثبت است، پس محور بین ۰ و ۳۰- می‌ماند → نرمال/مرزی، نه LAD.',
+    reason: '<b>۱.</b> لید I مثبت → جهت به چپ. <b>۲.</b> لید aVF منفی → جهت به بالا. <b>۳.</b> ربع چپ-بالا؛ لید II تصمیم‌گیرنده است. <b>۴.</b> لید II مثبت است → محور مرزی و فیزیولوژیک، نه LAD پاتولوژیک.'
+  }
+];
+
+/* ============================================================
+   ۴) وضعیت و ذخیره‌سازی
+   ============================================================ */
+var KEY = 'cardiac-axis-lesson-v1';
+var state = { cur: 0, ans: {}, fin: {} };
+
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+}
+function load(){
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw){
+      var s = JSON.parse(raw);
+      if (s && typeof s === 'object'){
+        state.cur = (typeof s.cur === 'number') ? s.cur : 0;
+        state.ans = s.ans || {};
+        state.fin = s.fin || {};
+      }
+    }
+  } catch(e){}
+}
+
+/* ============================================================
+   ۵) ساخت رابط کاربری
+   ============================================================ */
+function stepCardHTML(st, i){
+  var stripsHTML = '';
+  for (var si = 0; si < st.strips.length; si++){
+    var sp = st.strips[si];
+    stripsHTML += '<figure class="fig">'
+      + '<div class="ecg-wrap" data-strip="' + si + '">' + buildStrip(sp.leads) + '</div>'
+      + '<figcaption>' + sp.caption + '</figcaption>'
+      + '</figure>';
+  }
+
+  var optsHTML = '';
+  for (var oi = 0; oi < st.q.options.length; oi++){
+    optsHTML += '<button type="button" class="opt" data-opt="' + oi + '">' + st.q.options[oi] + '</button>';
+  }
+
+  return '<section class="card screen" data-screen="' + i + '">'
+    + '<h2>' + st.title + '</h2>'
+    + '<div class="body">' + st.body + '</div>'
+    + stripsHTML
+    + '<div class="quiz">'
+    + '<p class="qtext">' + st.q.text + '</p>'
+    + '<div class="opts">' + optsHTML + '</div>'
+    + '<div class="fb" hidden></div>'
+    + '</div>'
+    + '<div class="navbtns">'
+    + '<button type="button" class="btn ghost prev"' + (i === 0 ? ' disabled' : '') + '>مرحله قبل</button>'
+    + '<button type="button" class="btn primary next" disabled>' + (i === STEPS.length - 1 ? 'رفتن به آزمون پایانی' : 'مرحله بعد') + '</button>'
+    + '</div>'
+    + '</section>';
+}
+
+function finalHTML(){
+  var h = '<section class="card screen" data-screen="' + STEPS.length + '">'
+    + '<h2>آزمون پایانی — پنج نوار، پنج تفسیر</h2>'
+    + '<p>حالا خودتان از ابتدا تا انتها تفسیر کنید. برای هر نوار ابتدا لید I و aVF و سپس در صورت نیاز لید II را بررسی کنید.</p>';
+
+  for (var i = 0; i < FINAL.length; i++){
+    var f = FINAL[i];
+    var opts = '';
+    for (var oi = 0; oi < OPT_AXIS.length; oi++){
+      opts += '<button type="button" class="opt fopt" data-opt="' + oi + '">' + OPT_AXIS[oi] + '</button>';
+    }
+    h += '<div class="fcard" data-fi="' + i + '">'
+      + '<h3>نوار ' + (i+1) + '</h3>'
+      + '<div class="ecg-wrap" data-strip="0">' + buildStrip(f.leads) + '</div>'
+      + '<div class="fopts">' + opts + '</div>'
+      + '<div class="fb" hidden></div>'
+      + '<div class="reason" hidden></div>'
+      + '</div>';
+  }
+
+  h += '<div class="summary" id="summary" hidden></div>'
+    + '<div class="navbtns">'
+    + '<button type="button" class="btn ghost" id="backToSteps">بازگشت به گام‌ها</button>'
+    + '</div>'
+    + '</section>';
+  return h;
+}
+
+function buildDots(){
+  var d = document.getElementById('dots');
+  var h = '';
+  for (var i = 0; i < STEPS.length; i++){
+    h += '<button type="button" class="dot" data-go="' + i + '">' + (i+1) + '</button>';
+  }
+  h += '<button type="button" class="dot wide" data-go="' + STEPS.length + '">آزمون</button>';
+  d.innerHTML = h;
+
+  var btns = d.querySelectorAll('[data-go]');
+  for (var k = 0; k < btns.length; k++){
+    btns[k].addEventListener('click', function(){
+      var n = Number(this.getAttribute('data-go'));
+      if (n <= maxUnlocked()) go(n);
+    });
+  }
+}
+
+function maxUnlocked(){
+  var i = 0;
+  while (i < STEPS.length && state.ans[i] !== undefined) i++;
+  return i;
+}
+
+function buildUI(){
+  var app = document.getElementById('app');
+  var html = '';
+  for (var i = 0; i < STEPS.length; i++) html += stepCardHTML(STEPS[i], i);
+  html += finalHTML();
+  app.innerHTML = html;
+
+  /* اتصال رویدادهای گام‌ها */
+  for (var s = 0; s < STEPS.length; s++){
+    (function(idx){
+      var card = document.querySelector('.screen[data-screen="' + idx + '"]');
+      var opts = card.querySelectorAll('.opt');
+      for (var j = 0; j < opts.length; j++){
+        (function(b){
+          b.addEventListener('click', function(){ answerStep(idx, Number(b.getAttribute('data-opt'))); });
+        })(opts[j]);
+      }
+      card.querySelector('.prev').addEventListener('click', function(){ go(state.cur - 1); });
+      card.querySelector('.next').addEventListener('click', function(){ go(state.cur + 1); });
+    })(s);
+  }
+
+  /* اتصال رویدادهای آزمون پایانی */
+  for (var f = 0; f < FINAL.length; f++){
+    (function(idx){
+      var fcard = document.querySelector('.fcard[data-fi="' + idx + '"]');
+      var opts = fcard.querySelectorAll('.fopt');
+      for (var j = 0; j < opts.length; j++){
+        (function(b){
+          b.addEventListener('click', function(){ answerFinal(idx, Number(b.getAttribute('data-opt'))); });
+        })(opts[j]);
+      }
+    })(f);
+  }
+
+  document.getElementById('backToSteps').addEventListener('click', function(){ go(STEPS.length - 1); });
+}
+
+/* ============================================================
+   ۶) منطق پاسخ و بازخورد
+   ============================================================ */
+function answerStep(i, oi){
+  if (state.ans[i] !== undefined) return;
+  state.ans[i] = oi;
+  save();
+  applyStepAnswer(i);
+  updateProgress();
+}
+
+function applyStepAnswer(i){
+  var st = STEPS[i];
+  var card = document.querySelector('.screen[data-screen="' + i + '"]');
+  var chosen = state.ans[i];
+  if (chosen === undefined) return;
+
+  var opts = card.querySelectorAll('.opt');
+  for (var j = 0; j < opts.length; j++){
+    opts[j].disabled = true;
+    if (j === st.q.correct) opts[j].classList.add('correct');
+    if (j === chosen && chosen !== st.q.correct) opts[j].classList.add('wrong');
+  }
+
+  var fb = card.querySelector('.fb');
+  fb.hidden = false;
+  var ok = (chosen === st.q.correct);
+  fb.className = 'fb ' + (ok ? 'ok' : 'no');
+  fb.innerHTML = '<b>' + (ok ? 'درست است.' : 'پاسخ درست نبود.') + '</b> ' + st.q.why;
+
+  for (var h = 0; h < st.q.hl.length; h++){
+    var target = st.q.hl[h];
+    var svg = card.querySelector('[data-strip="' + target.strip + '"] svg');
+    highlight(svg, target.leads);
+  }
+
+  card.querySelector('.next').disabled = false;
+}
+
+function answerFinal(i, oi){
+  if (state.fin[i] !== undefined) return;
+  state.fin[i] = oi;
+  save();
+  applyFinal(i);
+  updateProgress();
+  checkSummary();
+}
+
+function applyFinal(i){
+  var f = FINAL[i];
+  var card = document.querySelector('.fcard[data-fi="' + i + '"]');
+  var chosen = state.fin[i];
+  if (chosen === undefined) return;
+
+  var opts = card.querySelectorAll('.fopt');
+  for (var j = 0; j < opts.length; j++){
+    opts[j].disabled = true;
+    if (j === f.correct) opts[j].classList.add('correct');
+    if (j === chosen && chosen !== f.correct) opts[j].classList.add('wrong');
+  }
+
+  var fb = card.querySelector('.fb');
+  fb.hidden = false;
+  var ok = (chosen === f.correct);
+  fb.className = 'fb ' + (ok ? 'ok' : 'no');
+  fb.innerHTML = '<b>' + (ok ? 'درست است.' : 'پاسخ درست نبود.') + '</b> ' + f.why;
+
+  var reason = card.querySelector('.reason');
+  reason.hidden = false;
+  reason.innerHTML = '<b>مسیر تفسیر:</b> ' + f.reason;
+
+  var svg = card.querySelector('svg');
+  var names = [];
+  for (var k = 0; k < f.leads.length; k++) names.push(f.leads[k].name);
+  highlight(svg, names);
+}
+
+function checkSummary(){
+  var count = 0;
+  for (var i = 0; i < FINAL.length; i++){
+    if (state.fin[i] !== undefined) count++;
+  }
+  if (count < FINAL.length) return;
+
+  var score = 0;
+  for (var j = 0; j < FINAL.length; j++){
+    if (state.fin[j] === FINAL[j].correct) score++;
+  }
+
+  var s = document.getElementById('summary');
+  s.hidden = false;
+  var msg = (score === FINAL.length)
+    ? ' عالی بود — رویکرد استاندارد را کامل به کار بردید.'
+    : ' نوارهای اشتباه را دوباره مرور کنید؛ به‌ویژه بررسی لید II و توجه به موج P در لید I و aVR.';
+  s.innerHTML = '<b>نتیجه:</b> ' + score + ' از ' + FINAL.length + ' نوار را درست تفسیر کردید.' + msg;
+}
+
+/* ============================================================
+   ۷) ناوبری و نوار پیشرفت
+   ============================================================ */
+function go(n){
+  if (n < 0) n = 0;
+  if (n > STEPS.length) n = STEPS.length;
+  state.cur = n;
+  save();
+  showScreen(n);
+  updateProgress();
+}
+
+function showScreen(n){
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++){
+    var on = (Number(screens[i].getAttribute('data-screen')) === n);
+    screens[i].classList.toggle('active', on);
+  }
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){ window.scrollTo(0,0); }
+}
+
+function updateProgress(){
+  var total = STEPS.length + FINAL.length;
+  var done = 0, k;
+  for (k in state.ans) if (state.ans.hasOwnProperty(k)) done++;
+  for (k in state.fin) if (state.fin.hasOwnProperty(k)) done++;
+  if (done > total) done = total;
+
+  document.getElementById('pbar').style.width = Math.round(done / total * 100) + '%';
+
+  var dots = document.querySelectorAll('.dot');
+  for (var i = 0; i < dots.length; i++){
+    var n = Number(dots[i].getAttribute('data-go'));
+    var finished;
+    if (n < STEPS.length) finished = (state.ans[n] !== undefined);
+    else finished = (Object.keys(state.fin).length === FINAL.length);
+    dots[i].classList.toggle('done', finished);
+    dots[i].classList.toggle('active', n === state.cur);
+  }
+}
+
+/* ============================================================
+   ۸) راه‌اندازی
+   ============================================================ */
+function restore(){
+  var i;
+  for (i = 0; i < STEPS.length; i++){
+    if (state.ans[i] !== undefined) applyStepAnswer(i);
+  }
+  for (i = 0; i < FINAL.length; i++){
+    if (state.fin[i] !== undefined) applyFinal(i);
+  }
+  checkSummary();
+
+  if (state.cur < 0 || state.cur > STEPS.length) state.cur = 0;
+  showScreen(state.cur);
+  updateProgress();
+}
+
+function boot(){
+  load();
+  buildDots();
+  buildUI();
+  restore();
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if (!confirm('همه پاسخ‌ها و پیشرفت پاک شود؟')) return;
+    try { localStorage.removeItem(KEY); } catch(e){}
+    state = { cur: 0, ans: {}, fin: {} };
+    document.getElementById('app').innerHTML = '';
+    buildDots();
+    buildUI();
+    showScreen(0);
+    updateProgress();
+  });
+}
+
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
+</script>
+</body>
+</html>
